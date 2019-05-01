@@ -1,9 +1,6 @@
 import sys
 import pygame
 
-# note: to set pixel 100, 100 to white:
-# background.set_at((100, 100), (255, 255, 255))
-
 
 def main():
 
@@ -21,6 +18,11 @@ def main():
     background = background.convert()
     background.fill(black)
 
+    screen.blit(background, (0, 0))
+    pygame.display.flip()
+
+    first_click = True
+    save_coords = (0, 0)
     while True:
 
         # wait for exit
@@ -31,11 +33,19 @@ def main():
         # when left mouse button is pressed, capture position
         get_click = pygame.mouse.get_pressed()
         if get_click[0] > 0:
-            print(str(pygame.mouse.get_pos()))
+            if first_click:
+                save_coords = pygame.mouse.get_pos()
+                first_click = False
+            else:
+                pygame.draw.line(screen, (255, 255, 255),
+                                 save_coords, pygame.mouse.get_pos())
+                save_coords = pygame.mouse.get_pos()
+            pygame.display.flip()
 
-        # update display
-        screen.blit(background, (0, 0))
-        pygame.display.flip()
+        # if the mouse buttons aren't pressed, we reset the start of the line
+        else:
+            save_coords = (0, 0)
+            first_click = True
 
 
 main()
