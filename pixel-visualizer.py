@@ -7,7 +7,7 @@ def main():
     pygame.init()
 
     # default size - 100x100 px
-    size = width, height = 500, 500
+    size = width, height = 50, 50
 
     # default color - black
     black = 0, 0, 0
@@ -28,6 +28,11 @@ def main():
         # wait for exit
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
+                with open("test.txt", "wb") as binary_file:
+                    for xx in range(0, width):
+                        for yy in range(0, height):
+                            binary_file.write(
+                                bytes([screen.get_at((xx, yy))[0]]))
                 sys.exit()
 
         # when left mouse button is pressed, capture position
