@@ -1,24 +1,59 @@
 import sys
 import pygame
+import argparse
+import os
 
 
 def main():
+    parser = argparse.ArgumentParser(
+        description='Generate image from pixels or '
+        'generate pixels from image.')
+    parser.add_argument('-s', dest='size', type=int, default=100,
+                        help='size in pixels x pixels (square)')
+    parser.add_argument('filename')
+    args = parser.parse_args()
 
-    pygame.init()
-
-    # default size - 100x100 px
-    size = width, height = 50, 50
+    size = args.size
+    filename = args.filename
 
     # default color - black
     black = 0, 0, 0
 
     # set up this screen
-    screen = pygame.display.set_mode(size)
+    pygame.init()
+
+    screen = pygame.display.set_mode((size, size))
     background = pygame.Surface(screen.get_size())
     background = background.convert()
     background.fill(black)
 
     screen.blit(background, (0, 0))
+    pygame.display.flip()
+
+    # read bytes from file if it already exists
+    pix_list = []
+    if not os.path.exists(filename + '.txt'):
+        with open(filename + ".txt", "wb") as f:
+            for xx in range(0, size):
+                for yy in range(0, size):
+                    f.write(
+                        bytes([screen.get_at((xx, yy))[0]]))
+    with open(filename + ".txt", "rb") as f:
+        byte = f.read(1)
+        while byte != b"":
+            byte = f.read(1)
+            pixel = int.from_bytes(byte, "big")
+            pix_list.append(pixel)
+
+    if len(pix_list) != size * size:
+        print("Bad file size")
+        return
+    else:
+        for xx in range(0, size):
+            for yy in range(0, size):
+                color = pix_list[size * xx + yy]
+                screen.set_at((xx, yy), (color, color, color, 255))
+
     pygame.display.flip()
 
     first_click = True
@@ -28,10 +63,10 @@ def main():
         # wait for exit
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
-                with open("test.txt", "wb") as binary_file:
-                    for xx in range(0, width):
-                        for yy in range(0, height):
-                            binary_file.write(
+                with open(filename + ".txt", "wb") as f:
+                    for xx in range(0, size):
+                        for yy in range(0, size):
+                            f.write(
                                 bytes([screen.get_at((xx, yy))[0]]))
                 sys.exit()
 
